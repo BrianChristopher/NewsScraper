@@ -5,27 +5,21 @@ const cheerio = require("cheerio");
 
 const db = require("../models");
 
-
-
 // Routes
 
 // A GET route for scraping NPR website
 
 router.get("/", function(req, res) {
-    
   db.Article.find({})
-  .then(function(dbArticle) {
-    // If we were able to successfully find Articles, send them back to the client
-    res.render("index", {hbsObjectMain : dbArticle.reverse()});
-  })
-  .catch(function(err) {
-    // If an error occurred, send it to the client
-    res.json(err);
-  });
-  
-  
-  
-  
+    .then(function(dbArticle) {
+      // If we were able to successfully find Articles, send them back to the client
+      res.render("index", { hbsObjectMain: dbArticle.reverse() });
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+
   // var hbsObject = [{
   //   thiss : "This is this 1.",
   //   that : "This is that 1."
@@ -40,44 +34,61 @@ router.get("/", function(req, res) {
   //   }]
   //   console.log(hbsObject);
   //   res.render("index", {hbsObjectMain: hbsObject });
-  
 });
 
-
-
 router.get("/scrape", function(req, res) {
-    // First, we grab the body of the html with axios
-    axios.get("https://www.npr.org/").then(function(response) {
-      // Then, we load that into cheerio and save it to $ for a shorthand selector
-      let $ = cheerio.load(response.data);
-  
-      // Now, we grab every story-text class within a div tag, and do the following:
-      $("div.story-text").each(function(i, element) {
-        // Save an empty result object
-        let result = {};
-  
-        // Add the title, link, summary, and image of every story, and save them as properties of the result object
-        result.title = $(element).find("h3").text();
-        result.link = $(element).children("a").attr("href");
-        result.summary = $(element).find("p.teaser").text();
-        result.image = $(element).parent().find("img").attr("src");
+  // First, we grab the body of the html with axios
+  axios.get("https://www.npr.org/").then(function(response) {
+    // Then, we load that into cheerio and save it to $ for a shorthand selector
+    let $ = cheerio.load(response.data);
 
-        // Create a new Article using the `result` object built from scraping
-         db.Article.create(result)
-           .then(function(dbArticle) {
-        // View the added result in the console
-        //     console.log(dbArticle);
-           })
-           .catch(function(err) {
-        // If an error occurred, log it
-             console.log(err);
-           });
-      });
-  
-      // Send a message to the client
-      res.send("Scrape Complete");
+    // Now, we grab every story-text class within a div tag, and do the following:
+    $("div.story-text").each(function(i, element) {
+      // Save an empty result object
+      let result = {};
+
+      // Add the title, link, summary, and image of every story, and save them as properties of the result object
+      result.title = $(element)
+        .find("h3")
+        .text();
+      result.link = $(element)
+        .children("a")
+        .attr("href");
+      result.summary = $(element)
+        .find("p.teaser")
+        .text();
+      result.image = $(element)
+        .parent()
+        .find("img")
+        .attr("src");
+
+      // Create a new Article using the `result` object built from scraping
+      db.Article.create(result)
+        .then(function(dbArticle) {
+          // View the added result in the console
+          //     console.log(dbArticle);
+        })
+        .catch(function(err) {
+          // If an error occurred, log it
+          console.log(err);
+        });
     });
+
+    // Send a message to the client
+    //res.send("Scrape Complete");
+
+    //Then reload the index page with all articles.
+    db.Article.find({})
+      .then(function(dbArticle) {
+        // If we were able to successfully find Articles, send them back to the client
+        res.render("index", { hbsObjectMain: dbArticle.reverse() });
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
   });
+});
 
 // Route for getting all Articles from the db
 router.get("/articles", function(req, res) {
@@ -92,11 +103,6 @@ router.get("/articles", function(req, res) {
       res.json(err);
     });
 });
-
-
-
-
-
 
 // Export routes for server.js to use.
 module.exports = router;
