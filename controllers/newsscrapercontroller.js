@@ -36,6 +36,19 @@ router.get("/", function(req, res) {
   //   res.render("index", {hbsObjectMain: hbsObject });
 });
 
+
+router.get("/favorites", function(req, res) {
+  db.Article.find({$where:{favorite : true}})
+    .then(function(dbArticle) {
+      // If we were able to successfully find Articles, send them back to the client
+      res.render("index", { hbsObjectMain: dbArticle.reverse() });
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
+
 router.get("/scrape", function(req, res) {
   // First, we grab the body of the html with axios
   axios.get("https://www.npr.org/").then(function(response) {
@@ -103,6 +116,17 @@ router.get("/articles", function(req, res) {
       res.json(err);
     });
 });
+
+
+// Route for grabbing a specific Article by id, populate it with it's note
+router.post("/favorite/:id", function(req, res) {
+  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+  console.log("req.params = ", req.params.id);
+  console.log("req.data.favorite = ", req.data)
+  db.Article.findOneAndUpdate({ _id: req.params.id }, { $set: {favorite: true }});
+});
+
+
 
 // Export routes for server.js to use.
 module.exports = router;

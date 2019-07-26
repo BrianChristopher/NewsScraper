@@ -13,7 +13,7 @@
         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Favorites</a>
+        <a class="nav-link" href="/favorites">Favorites</a>
       </li>
     </ul>
   </div>
@@ -36,7 +36,7 @@
             <h4>{{this.title}}</h4>
           </a>
           <p>{{this.summary}}</p>
-          <a href="#" class="btn btn-primary"><i class="fas fa-heart"></i> Add to Favorites</a>
+          <button href="#" class="btn btn-primary favoriteButton" data-id={{this._id}}><i class="fas fa-heart"></i> Add to Favorites</button>
         </div>
       </div>
     </div>
